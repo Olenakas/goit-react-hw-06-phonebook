@@ -1,52 +1,50 @@
 import React, { useState } from 'react';
-import PropTypes from "prop-types";
 import styles from './ContactForm.module.css';
 
-const ContactForm = ({ onAddContact }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+import {useDispatch, useSelector} from "react-redux";
+import {getContacts} from "../../redux/selectors";
+import {addContact} from "../../redux/contactSlice";
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    name === 'name' ? setName(value) : setNumber(value);
-  };
+const ContactForm = () => {
+    const contacts = useSelector(getContacts);
+    const dispatch = useDispatch();
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    onAddContact(name, number);
-    setName('');
-    setNumber('');
-  };
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const name = event.target[0].value;
+        const number = event.target[1].value;
+        const existingContact = contacts.find((contact) => contact.name.toLowerCase() === name.toLowerCase());
+        if (existingContact) {
+            alert(`${name} is already in contacts.`);
+        } else {
+            dispatch(addContact({name, number}));
+            event.target[0].value = '';
+            event.target[1].value = '';
 
-  return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <label>
-        Name:
-        <input
-          type="text"
-          name="name"
-          value={name}
-          onChange={handleChange}
-          required
-        />
-      </label>
-      <label>
-        Number:
-        <input
-          type="tel"
-          name="number"
-          value={number}
-          onChange={handleChange}
-          required
-        />
-      </label>
-      <button type="submit">Add contact</button>
-    </form>
-  );
-};
+        }
+    };
 
-ContactForm.propTypes = {
-  onAddContact: PropTypes.func.isRequired,
+    return (
+        <form className={styles.form} onSubmit={handleSubmit}>
+            <label>
+                Name:
+                <input
+                    type="text"
+                    name="name"
+                    required
+                />
+            </label>
+            <label>
+                Number:
+                <input
+                    type="tel"
+                    name="number"
+                    required
+                />
+            </label>
+            <button type="submit">Add contact</button>
+        </form>
+    );
 };
 
 export default ContactForm;
